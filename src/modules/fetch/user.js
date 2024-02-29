@@ -35,6 +35,18 @@ const getUser = async (id) => {
   }
 };
 
+const getUserAddress = async (id) => {
+  try {
+    const response = await axios.get(`/api/v1/users/${id}/addresses`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
 const register = async (email, password, name, phone_number, username) => {
   try {
@@ -60,4 +72,4 @@ const register = async (email, password, name, phone_number, username) => {
 };
 
 
-module.exports = { login, register, getUser };
+module.exports = { login, register, getUser, getUserAddress };
