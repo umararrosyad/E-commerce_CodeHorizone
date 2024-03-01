@@ -1,4 +1,3 @@
-
 // const axios = require('axios');
 
 import { instance as axios } from "../axios";
@@ -13,13 +12,28 @@ const getCity = async (province_id) => {
 };
 
 const getProvince = async () => {
-    try {
-      const response = await axios.get(`/api/v1/rajaongkirs/provinces/`);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  try {
+    const response = await axios.get(`/api/v1/rajaongkirs/provinces/`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
+const getCost = async (origin, weight, destination) => {
+  try {
+    const requestData = {
+      origin,
+      weight,
+      destination,
+    };
+    const response = await axios.post(`/api/v1/rajaongkirs/cost/`, requestData, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-module.exports = { getCity, getProvince};
+module.exports = { getCity, getProvince, getCost };

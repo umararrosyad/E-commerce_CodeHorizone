@@ -1,26 +1,30 @@
-import React from 'react'
-import Navbar from '@/components/Navbar'
-import CartPage from '@/components/CartPage'
-import Footer from '@/components/Footer'
+import React from "react";
+import Navbar from "@/components/Navbar";
+import CartPage from "@/components/CartPage";
+import Footer from "@/components/Footer";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function cart() {
   return (
     <>
-      <main className="bg-bgSecondary">
-        <section>
+      <main className="bg-gray-100">
+        <div>
           <div className="container">
             <Navbar></Navbar>
           </div>
-        </section>
-        <section>
-          <div className="container mx-auto pt-48">
+        </div>
+        <div>
+          <div className=" mx-10 mb-20 pt-28">
             <CartPage />
           </div>
-        </section>
-        <section>
+        </div>
+        <div>
           <Footer />
-        </section>
+        </div>
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
+
       </main>
     </>
-  )
+  );
 }

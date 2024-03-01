@@ -7,13 +7,20 @@ import { getAllVariantdetail } from "@/modules/fetch/variant";
 import { useRouter } from "next/router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { createCart } from "@/modules/fetch/cart";
 
 export default function ProductDetail({ productDetail }) {
   // console.log(productDetail);
   const [type, setType] = useState();
   const [size, setSize] = useState();
   const [variant, setVariant] = useState();
+  const [qty, setQty] = useState(0);
 
+  let user_id;
+
+  if (typeof window !== "undefined") {
+    user_id = window.localStorage.getItem("user_id");
+  }
   const router = useRouter();
 
   const { id } = router.query;
@@ -26,10 +33,11 @@ export default function ProductDetail({ productDetail }) {
         console.log(dataVariant);
         if (dataVariant.status == "error") {
           setVariant();
+          setQty(0);
           console.log(variant);
         } else {
           if (dataVariant.data[0].stock == 0) {
-            toast.success("stock kosong", {
+            toast.error("stock kosong", {
               position: "top-right",
               autoClose: 2000,
               hideProgressBar: false,
@@ -37,7 +45,7 @@ export default function ProductDetail({ productDetail }) {
               pauseOnHover: true,
               draggable: true,
               progress: undefined,
-              theme: "light"
+              theme: "light",
             });
 
             setType();
@@ -67,6 +75,33 @@ export default function ProductDetail({ productDetail }) {
       setSize();
     } else {
       setSize(size_id);
+    }
+  };
+
+  const handleCart = async () => {
+    if (variant?.id && qty != 0) {
+      const response = await createCart(user_id, variant?.id, qty);
+      toast.success("Product telah dimasukkan ke keranjang", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    } else {
+      toast.error("Anda belum memilih type dan size", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
   };
 
@@ -190,15 +225,25 @@ export default function ProductDetail({ productDetail }) {
                 <div className="w-32 ps-4 mb-8 ">
                   <h2 className=" text-md font-semibold dark:text-gray-400">Quantity</h2>
                   <div className="relative flex flex-row w-full h-10 bg-button border rounded-full">
-                    <button className="w-20 h-full text-gray-600 bg-gray-100 rounded-l outline-none cursor-pointer dark:hover:bg-gray-700 dark:text-gray-400 hover:text-gray-700 dark:bg-gray-900 hover:bg-gray-400">
+                    <button
+                      className="w-20 h-full text-gray-600 bg-gray-100 rounded-l outline-none cursor-pointer dark:hover:bg-gray-700 dark:text-gray-400 hover:text-gray-700 dark:bg-gray-900 hover:bg-gray-400"
+                      onClick={() => {
+                        if (qty > 0) {
+                          setQty(qty - 1);
+                        }
+                      }}
+                    >
                       <span className="m-auto text-2xl font-thin">-</span>
                     </button>
-                    <input
-                      type="number"
-                      className="flex items-center w-full border font-semibold text-center text-gray-700 placeholder-gray-700 bg-gray-50 outline-none dark:text-gray-400 dark:placeholder-gray-400 dark:bg-gray-900 focus:outline-none text-md hover:text-black"
-                      placeholder="1"
-                    />
-                    <button className="w-20 h-full text-gray-600 bg-gray-100 rounded-r outline-none cursor-pointer dark:hover:bg-gray-700 dark:text-gray-400 dark:bg-gray-900 hover:text-gray-700 hover:bg-gray-400">
+                    <div className="text-md font-bold mx-2 self-center">{qty}</div>
+                    <button
+                      className="w-20 h-full text-gray-600 bg-gray-100 rounded-r outline-none cursor-pointer dark:hover:bg-gray-700 dark:text-gray-400 dark:bg-gray-900 hover:text-gray-700 hover:bg-gray-400"
+                      onClick={() => {
+                        if (qty < variant?.stock) {
+                          setQty(qty + 1);
+                        }
+                      }}
+                    >
                       <span className="m-auto text-2xl font-thin">+</span>
                     </button>
                   </div>
@@ -206,9 +251,9 @@ export default function ProductDetail({ productDetail }) {
 
                 <div className="flex items-center mx-5 space-x-4">
                   <div className="w-1/2 mb-4">
-                    <Link href="/cart">
-                      <button className="bg-transparent text-primary w-full font-bold py-2 px-4 border border-primary rounded-full ">Masukan Keranjang</button>
-                    </Link>
+                    <button className="bg-transparent text-primary w-full font-bold py-2 px-4 border border-primary rounded-full " onClick={() => handleCart()}>
+                      Masukan Keranjang
+                    </button>
                   </div>
                   <div className="mb-4 w-1/2">
                     <Link href="/checkout">
