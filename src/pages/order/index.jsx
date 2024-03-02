@@ -15,15 +15,15 @@ export default function orderpage() {
           </div>
         </div>
         <div>
-          <div className="flex  gap-6  mx-5 md:mx-10 pt-28 mb-10">
+          <div className="flex min-h-screen  gap-6  mx-5 md:mx-10 pt-28 mb-10">
             <div className="hidden md:block">
-              <Sidebar sideLocation={"pesanan"}/>
+              <Sidebar sideLocation={"pesanan"} />
             </div>
             {/* SidebarMini */}
             <div className="md:hidden">
               <SidebarMini />
             </div>
-            <OrderDashboard  />
+            <OrderDashboard />
           </div>
         </div>
         <section>

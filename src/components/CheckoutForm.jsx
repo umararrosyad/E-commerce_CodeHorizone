@@ -10,6 +10,7 @@ import { fillProduct, removeProduct, clearProduct, updateProduct } from "@/store
 import { propTypeVariant } from "@material-tailwind/react/types/components/timeline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { createTransaction } from "@/modules/fetch/transaction";
 
 export default function CartPage() {
   const [address, setAddress] = useState();
@@ -20,6 +21,7 @@ export default function CartPage() {
 
   const dispatch = useDispatch();
   const productDetail = useSelector((state) => state.product.product_detail);
+  const router = useRouter();
 
   let user_id;
 
@@ -28,6 +30,7 @@ export default function CartPage() {
   }
 
   useEffect(() => {
+    console.log("productDetail");
     console.log(productDetail);
     let total = 0;
     let shipping = 0;
@@ -141,10 +144,33 @@ export default function CartPage() {
     setAlamat(item);
   };
 
+  const handlePesan = async () => {
+    if (!alamat) {
+      toast.error("Pilih alamat terlebih dahulu", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    } else {
+      let transaction_detail = [];
+      productDetail.map((item) => {
+        transaction_detail.push({ product_variant_id: item.product_variant_id, price: item.product_variant.price * item.qty, qty: item.qty });
+      });
 
-  const handlePesan = async()=>{
-    
-  }
+      try {
+        const response = await createTransaction(user_id, alamat.id, totalHarga, cost, payment, transaction_detail);
+        console.log(response.data);
+        router.push("/order");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   return (
     <div className="w-full gap-5 flex flex-row">

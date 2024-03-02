@@ -1,25 +1,21 @@
 import { useRouter } from "next/navigation";
 import { login } from "@/modules/fetch/user";
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Image from "next/image";
-import Link from "next/link";
-import logo from "../../public/images/logo.svg";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  // const togglePasswordVisibility = () => {
+  //   setShowPassword(!showPassword);
+  // };
 
-  useEffect(() => {
-    // Mengambil data cookie
-    const myCookieValue = Cookies.get("access_token");
-    console.log(myCookieValue);
-  }, []);
+  // useEffect(() => {
+  //   // Mengambil data cookie
+  //   const myCookieValue = Cookies.get("access_token");
+  //   console.log(myCookieValue);
+  // }, []);
   const { push } = useRouter();
   async function handleSubmit(event) {
     event.preventDefault();

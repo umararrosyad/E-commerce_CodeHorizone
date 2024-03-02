@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createCart } from "@/modules/fetch/cart";
+import { getFeedbackProduct } from "@/modules/fetch/feedback";
 
 export default function ProductDetail({ productDetail }) {
   // console.log(productDetail);
@@ -15,6 +16,7 @@ export default function ProductDetail({ productDetail }) {
   const [size, setSize] = useState();
   const [variant, setVariant] = useState();
   const [qty, setQty] = useState(0);
+  const [feedback, setFeedback] = useState();
 
   let user_id;
 
@@ -62,6 +64,19 @@ export default function ProductDetail({ productDetail }) {
     fetchProducts();
   }, [size, type]);
 
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const response = await getFeedbackProduct(id);
+        setFeedback(response.data);
+        console.log(response.data);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchFeedbacks();
+  }, []);
+
   const handleType = async (type_id) => {
     if (type == type_id) {
       setType();
@@ -79,29 +94,66 @@ export default function ProductDetail({ productDetail }) {
   };
 
   const handleCart = async () => {
-    if (variant?.id && qty != 0) {
-      const response = await createCart(user_id, variant?.id, qty);
-      toast.success("Product telah dimasukkan ke keranjang", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+    if (!user_id) {
+      router.push("/login");
     } else {
-      toast.error("Anda belum memilih type dan size", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      if (variant?.id && qty != 0) {
+        const response = await createCart(user_id, variant?.id, qty);
+        toast.success("Product telah dimasukkan ke keranjang", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      } else {
+        toast.error("Anda belum memilih type dan size", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    }
+  };
+
+  const handleBeli = async () => {
+    if (!user_id) {
+      router.push("/login");
+    } else {
+      if (variant?.id && qty != 0) {
+        const response = await createCart(user_id, variant?.id, qty);
+        toast.success("Anda akan kami arahkan untuk melakukan pembelian", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+
+        router.push("/cart");
+      } else {
+        toast.error("Anda belum memilih type dan size", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
     }
   };
 
@@ -256,9 +308,9 @@ export default function ProductDetail({ productDetail }) {
                     </button>
                   </div>
                   <div className="mb-4 w-1/2">
-                    <Link href="/checkout">
-                      <button className="bg-primary text-white w-full font-bold py-2 rounded-full ">Beli Sekarang</button>
-                    </Link>
+                    <button className="bg-primary text-white w-full font-bold py-2 rounded-full " onClick={() => handleBeli()}>
+                      Beli Sekarang
+                    </button>
                   </div>
                 </div>
               </div>
@@ -326,7 +378,80 @@ export default function ProductDetail({ productDetail }) {
             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-3">{productDetail?.rating_product}</span>
           </div>
         </div>
-        <div className=" w-full text-md p-4"></div>
+        {feedback?.map((item) => (
+          <>
+            <div className=" w-full flex flex-col px-5 gap-2 p-3">
+              <div className="w-full flex flex-row justify-between gap-2">
+                <div className="flex item-center gap-3">
+                  <div class="w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                    <img class="w-8 h-8 rounded-full" src={item.user.photo_url ? item.user.photo_url : "https://static-00.iconduck.com/assets.00/user-icon-1024x1024-dtzturco.png"} alt="Rounded avatar" />
+                  </div>
+                  <div className="text-lg text-gray-800 self-center font-bold ">{item.user.username}</div>
+                </div>
+                <div class="flex justify-self-end items-center">
+                  <div class="flex items-center space-x-1 rtl:space-x-reverse">
+                    {item.rating >= 1 ? (
+                      <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    ) : (
+                      <svg class="w-4 h-4 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    )}
+                    {item.rating >= 2 ? (
+                      <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    ) : (
+                      <svg class="w-4 h-4 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    )}
+                    {item.rating >= 3 ? (
+                      <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    ) : (
+                      <svg class="w-4 h-4 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    )}
+                    {item.rating >= 4 ? (
+                      <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    ) : (
+                      <svg class="w-4 h-4 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    )}
+                    {item.rating >= 5 ? (
+                      <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    ) : (
+                      <svg class="w-4 h-4 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                      </svg>
+                    )}
+                  </div>
+                  <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-3">{productDetail?.rating_product}</span>
+                </div>
+              </div>
+              <p className="text-md text-gray-500 font-light">
+                variant : {item?.product_variant.product_type.type_name}, {item?.product_variant.product_size.size_name}{" "}
+              </p>
+              <p className="text-md  rounded-md mt-1 w-full p-5 bg-gray-200 font-medium">{item.feedback}</p>
+              <div class="grid grid-cols-5  md:grid-cols-10 mt-5 gap-4">
+                {item.feedback_galleries.map((item) => (
+                  <img className="w-20 h-20 object-cover shadow-lg border self-center border-gray-300" src={item?.photo_url ? item?.photo_url : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} alt="Neil image" />
+                ))}
+              </div>
+            </div>
+            <hr class="h-px mx-4 bg-primary mt-6 border-0 dark:bg-gray-700" />
+          </>
+        ))}
       </div>
     </div>
   );
